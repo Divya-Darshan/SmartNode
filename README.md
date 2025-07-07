@@ -2,6 +2,12 @@
 
 > A low-cost, modular, and scalable smart home management system using **ESP32-S3** and **ESP8266 (NodeMCU)** to promote accessible automation for daily life.
 
+### 📷 ESP32-S3 Pinout Diagram
+<img src="" alt="ESP32-S3 Pinout" width="500"/>
+
+### 📷 ESP8266 Pinout Diagram
+<img src="" alt="ESP8266 Pinout" width="500"/>
+
 ---
 
 ## 📘 Project Overview
@@ -65,9 +71,6 @@ SmartNode/
 
 ---
 
-
----
-
 ## 🔗 Important References
 
 - 🔧 [ESP32-S3 – Espressif Official](https://www.espressif.com/en/products/socs/esp32-s3)
@@ -90,7 +93,7 @@ SmartNode/
 **Goal:** SDG 7 – Affordable and Clean Energy  
 **Target 7.3:** Improve energy efficiency by enabling intelligent appliance control through automation.
 
-
+---
 
 ## 📜 License
 
