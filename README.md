@@ -38,7 +38,7 @@ Built on insights from the IEEE paper _“Scalable Smart Home Management with ES
 | Relay Module   | Switch appliances                  |
 | Power Adapter  | 5V regulated supply for the board  |
 
-📸 _Insert board images here (ESP8266 & ESP32-S3)_
+
 
 ---
 
