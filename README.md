@@ -2,11 +2,15 @@
 
 > A low-cost, modular, and scalable smart home management system using **ESP32-S3** and **ESP8266 (NodeMCU)** to promote accessible automation for daily life.
 
+
+
 ### 📷 ESP32-S3 Pinout Diagram
 <img src="circuit_diagrams/esp32.webp" alt="ESP32-S3 Pinout" width="500"/>
 
 ### 📷 ESP8266 Pinout Diagram
 <img src="circuit_diagrams/ESP8266-WeMos-d1.png" alt="ESP8266 Pinout" width="500"/>
+
+<img src="circuit_diagrams/cir.jpg" alt="ESP32-S3 Pinout" width="500"/>
 
 ---
 
