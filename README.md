@@ -107,7 +107,7 @@ This project is open-source under the MIT License.
 
 ## 👨‍💼 Authors & Acknowledgment
 
-Made by Divya Darshan  
+Made by Divya Darshan, Harish  
 Based on the IEEE paper mentioned above and developed under the course *23CS1512 – Socially Relevant Mini Project* at **Panimalar Engineering College**.
 
 ---
