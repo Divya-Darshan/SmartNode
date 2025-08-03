@@ -27,7 +27,6 @@ Built on insights from the IEEE paper _“Scalable Smart Home Management with ES
 - 📶 Remote switching via Wi-Fi using the Blynk App
 - 💻 Web interface and mobile access
 - ♻️ Real-time device status
-- 🛡️ Sensor integration (DHT11, PIR, etc.)
 - 🔒 Secure communication (optional MQTT/Firebase)
 - 🛠️ Modular setup (easy to scale room-by-room)
 
@@ -99,11 +98,7 @@ SmartNode/
 
 ---
 
-## 📜 License
 
-This project is open-source under the MIT License.
-
----
 
 ## 👨‍💼 Authors & Acknowledgment
 

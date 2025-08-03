@@ -1,3 +1,6 @@
+// Made by Divya Darshan, Harish
+// Based on the IEEE paper mentioned above and developed under the course 23CS1512 – Socially Relevant Mini Project at Panimalar Engineering College.
+
 #define BLYNK_TEMPLATE_ID "TMPL3e-Kt1AH1"
 #define BLYNK_TEMPLATE_NAME "SmartNode"
 #define BLYNK_AUTH_TOKEN "l2OXOjMapLMem-CDA40aBjzBdGpjsi_H"
@@ -7,20 +10,24 @@
 #include <ESP8266WiFi.h>
 #include <BlynkSimpleEsp8266.h>
 
-#define outputPin D2  // GPIO4 — Can be changed
+#define relayPin D2  // GPIO4 — connected to relay IN pin
 
-char ssid[] = "Darshan";          // Your WiFi name
-char pass[] = "pravina83";      // Your WiFi password
+char ssid[] = "";         
+char pass[] = "";        
 
 BLYNK_WRITE(V0) {
   int value = param.asInt();
-  digitalWrite(outputPin, value ? HIGH : LOW);
+  
+  // Relay is usually active LOW
+  digitalWrite(relayPin, value == 1 ? LOW : HIGH);
 }
 
 void setup() {
   Serial.begin(9600);
-  pinMode(outputPin, OUTPUT);
-  digitalWrite(outputPin, LOW);  // Start LOW
+  pinMode(relayPin, OUTPUT);
+
+  // Make sure relay is OFF initially
+  digitalWrite(relayPin, HIGH);
 
   WiFi.begin(ssid, pass);
   Serial.print("🔌 Connecting to Wi-Fi");
@@ -45,3 +52,6 @@ void loop() {
     Blynk.run();
   }
 }
+
+
+
