@@ -1,4 +1,4 @@
-# 🌐 Smart Node – Scalable Smart Home Automation System
+# 🌐 Smart Node
 
 > A low-cost, modular, and scalable smart home management system using **ESP32-S3** and **ESP8266 (NodeMCU)** to promote accessible automation for daily life.
 
