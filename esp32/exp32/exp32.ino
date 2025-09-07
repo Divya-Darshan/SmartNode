@@ -7,13 +7,14 @@
 
 #define BLYNK_PRINT Serial
 
-#include <ESP8266WiFi.h>
-#include <BlynkSimpleEsp8266.h>
+#include <WiFi.h>
+#include <BlynkSimpleEsp32.h>
 
-#define relayPin D2  // GPIO4 — connected to relay IN pin
+// On ESP32, use actual GPIO numbers
+#define relayPin 4   // GPIO4 → connected to relay IN pin
 
-char ssid[] = "hh";         
-char pass[] = "abcdefgh";        
+char ssid[] = "Darshan";      // Your Wi-Fi SSID
+char pass[] = "pravina83";      // Your Wi-Fi Password
 
 BLYNK_WRITE(V0) {
   int value = param.asInt();
@@ -29,9 +30,9 @@ void setup() {
   // Make sure relay is OFF initially
   digitalWrite(relayPin, HIGH);
 
-  WiFi.begin(ssid, pass);
-  Serial.print("🔌 Connecting to Wi-Fi");
+  Serial.println("🔌 Connecting to Wi-Fi...");
 
+  WiFi.begin(ssid, pass);
   int attempt = 0;
   while (WiFi.status() != WL_CONNECTED && attempt < 40) {
     delay(500);
@@ -41,7 +42,7 @@ void setup() {
 
   if (WiFi.status() == WL_CONNECTED) {
     Serial.println("\n✅ Wi-Fi connected!");
-    Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass, "blynk.cloud", 80);
+    Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
   } else {
     Serial.println("\n❌ Wi-Fi connection failed. Check SSID/Password.");
   }
@@ -52,6 +53,3 @@ void loop() {
     Blynk.run();
   }
 }
-
-
-
