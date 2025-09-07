@@ -10,28 +10,31 @@
 #include <WiFi.h>
 #include <BlynkSimpleEsp32.h>
 
-// On ESP32, use actual GPIO numbers
+// Relay control
 #define relayPin 4   // GPIO4 → connected to relay IN pin
 
-char ssid[] = "Darshan";      // Your Wi-Fi SSID
-char pass[] = "pravina83";      // Your Wi-Fi Password
+// Soil moisture sensor
+int soilPin = 32;      // Analog pin
+int soilValue = 0;
+int dryValue = 3500;   // sensor value in dry air (calibrate!)
+int wetValue = 1200;   // sensor value fully in water (calibrate!)
 
+// Wi-Fi credentials
+char ssid[] = "Darshan";
+char pass[] = "pravina83";
+
+// Relay control via Blynk app (Switch widget on V0)
 BLYNK_WRITE(V0) {
   int value = param.asInt();
-  
-  // Relay is usually active LOW
-  digitalWrite(relayPin, value == 1 ? LOW : HIGH);
+  digitalWrite(relayPin, value == 1 ? LOW : HIGH);  // Relay usually active LOW
 }
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   pinMode(relayPin, OUTPUT);
-
-  // Make sure relay is OFF initially
-  digitalWrite(relayPin, HIGH);
+  digitalWrite(relayPin, HIGH);  // Relay OFF initially
 
   Serial.println("🔌 Connecting to Wi-Fi...");
-
   WiFi.begin(ssid, pass);
   int attempt = 0;
   while (WiFi.status() != WL_CONNECTED && attempt < 40) {
@@ -51,5 +54,39 @@ void setup() {
 void loop() {
   if (WiFi.status() == WL_CONNECTED) {
     Blynk.run();
+
+    // Read soil sensor
+    soilValue = analogRead(soilPin);
+    int moisturePercent = map(soilValue, dryValue, wetValue, 0, 100);
+    moisturePercent = constrain(moisturePercent, 0, 100);
+
+    // Short status labels
+    String state;
+    if (moisturePercent < 25) {
+      state = "Super Dry";
+    } else if (moisturePercent < 40) {
+      state = "Dry";
+    } else if (moisturePercent <= 70) {
+      state = "Moist";
+    } else if (moisturePercent <= 85) {
+      state = "Wet";
+    } else {
+      state = "Soaked";
+    }
+
+    // Final message → "Moisture: 55% | Moist"
+    String statusMsg = String(moisturePercent) + "% | " + state;
+
+    // Print to Serial
+    Serial.print("Soil Value: ");
+    Serial.print(soilValue);
+    Serial.print(" | ");
+    Serial.println(statusMsg);
+
+    // Send to Blynk
+    Blynk.virtualWrite(V1, moisturePercent);   // V1 = Gauge/Display widget
+    Blynk.virtualWrite(V2, statusMsg);         // V2 = Text Label widget
+
+    delay(2000); // Update every 2 seconds
   }
 }
