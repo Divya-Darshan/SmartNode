@@ -1,5 +1,7 @@
-// Made by Divya Darshan, Harish
-// Based on the IEEE paper mentioned above and developed under the course 23CS1512 – Socially Relevant Mini Project at Panimalar Engineering College.
+/****************************************************
+ * SmartNode – Wokwi Virtual Smart Home Version (Full)
+ * Made by Divya Darshan & Harish
+ ****************************************************/
 
 #define BLYNK_TEMPLATE_ID "TMPL3e-Kt1AH1"
 #define BLYNK_TEMPLATE_NAME "SmartNode"
@@ -10,83 +12,122 @@
 #include <WiFi.h>
 #include <BlynkSimpleEsp32.h>
 
-// Relay control
-#define relayPin 4   // GPIO4 → connected to relay IN pin
+// ---------- Pin Configuration ----------
+#define RELAY_LIGHT 4     // Main Hall Light
+#define RELAY_FAN 5       // Ceiling Fan
+#define RELAY_TV 18       // Television
+#define RELAY_LAMP 19     // Table Lamp
+#define RELAY_PUMP 27     // Water Pump
+#define SOIL_PIN 32       // Soil sensor (Potentiometer in Wokwi)
 
-// Soil moisture sensor
-int soilPin = 32;      // Analog pin
+// ---------- WiFi Credentials ----------
+char ssid[] = "Wokwi-GUEST";
+char pass[] = "";
+
+// ---------- Soil Variables ----------
 int soilValue = 0;
-int dryValue = 3500;   // sensor value in dry air (calibrate!)
-int wetValue = 1200;   // sensor value fully in water (calibrate!)
+float displayedMoisture = 0; // For smoothing
+int moisturePercent = 0;
 
-// Wi-Fi credentials
-char ssid[] = "Darshan";
-char pass[] = "pravina83";
+// ---------- BLYNK INPUTS ----------
 
-// Relay control via Blynk app (Switch widget on V0)
+// Light Control (Button on V0)
 BLYNK_WRITE(V0) {
   int value = param.asInt();
-  digitalWrite(relayPin, value == 1 ? LOW : HIGH);  // Relay usually active LOW
+  digitalWrite(RELAY_LIGHT, value);
+  Serial.println(value ? "💡 Main Hall Light ON" : "💡 Main Hall Light OFF");
 }
 
+// Fan Control (Button on V4)
+BLYNK_WRITE(V4) {
+  int value = param.asInt();
+  digitalWrite(RELAY_FAN, value);
+  Serial.println(value ? "🌀 Fan ON" : "🌀 Fan OFF");
+}
+
+// TV Control (Button on V5)
+BLYNK_WRITE(V5) {
+  int value = param.asInt();
+  digitalWrite(RELAY_TV, value);
+  Serial.println(value ? "📺 TV ON" : "📺 TV OFF");
+}
+
+// Lamp Control (Button on V6)
+BLYNK_WRITE(V6) {
+  int value = param.asInt();
+  digitalWrite(RELAY_LAMP, value);
+  Serial.println(value ? "💡 Lamp ON" : "💡 Lamp OFF");
+}
+
+// Pump Control (Button on V3)
+BLYNK_WRITE(V3) {
+  int value = param.asInt();
+  digitalWrite(RELAY_PUMP, value);
+  Serial.println(value ? "🚿 Pump ON (Manual)" : "🚿 Pump OFF (Manual)");
+}
+
+// ---------- SETUP ----------
 void setup() {
   Serial.begin(115200);
-  pinMode(relayPin, OUTPUT);
-  digitalWrite(relayPin, HIGH);  // Relay OFF initially
 
-  Serial.println("🔌 Connecting to Wi-Fi...");
+  pinMode(RELAY_LIGHT, OUTPUT);
+  pinMode(RELAY_FAN, OUTPUT);
+  pinMode(RELAY_TV, OUTPUT);
+  pinMode(RELAY_LAMP, OUTPUT);
+  pinMode(RELAY_PUMP, OUTPUT);
+
+  digitalWrite(RELAY_LIGHT, LOW);
+  digitalWrite(RELAY_FAN, LOW);
+  digitalWrite(RELAY_TV, LOW);
+  digitalWrite(RELAY_LAMP, LOW);
+  digitalWrite(RELAY_PUMP, LOW);
+
+  Serial.println("🌐 Connecting to Wi-Fi...");
   WiFi.begin(ssid, pass);
-  int attempt = 0;
-  while (WiFi.status() != WL_CONNECTED && attempt < 40) {
-    delay(500);
-    Serial.print(".");
-    attempt++;
-  }
-
-  if (WiFi.status() == WL_CONNECTED) {
-    Serial.println("\n✅ Wi-Fi connected!");
-    Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
-  } else {
-    Serial.println("\n❌ Wi-Fi connection failed. Check SSID/Password.");
-  }
+  Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
+  Serial.println("✅ SmartNode Connected to Blynk IoT!");
 }
 
+// ---------- LOOP ----------
 void loop() {
-  if (WiFi.status() == WL_CONNECTED) {
-    Blynk.run();
+  Blynk.run();
 
-    // Read soil sensor
-    soilValue = analogRead(soilPin);
-    int moisturePercent = map(soilValue, dryValue, wetValue, 0, 100);
-    moisturePercent = constrain(moisturePercent, 0, 100);
+  // --- Read actual soil sensor ---
+  soilValue = analogRead(SOIL_PIN);
+  int targetMoisture = map(soilValue, 4095, 0, 0, 100);
+  targetMoisture = constrain(targetMoisture, 0, 100);
 
-    // Short status labels
-    String state;
-    if (moisturePercent < 25) {
-      state = "Super Dry";
-    } else if (moisturePercent < 40) {
-      state = "Dry";
-    } else if (moisturePercent <= 70) {
-      state = "Moist";
-    } else if (moisturePercent <= 85) {
-      state = "Wet";
-    } else {
-      state = "Soaked";
-    }
+  // --- Smooth the displayed value ---
+  float smoothing = 0.05; // 5% change per loop
+  displayedMoisture = displayedMoisture + (targetMoisture - displayedMoisture) * smoothing;
 
-    // Final message → "Moisture: 55% | Moist"
-    String statusMsg = String(moisturePercent) + "% | " + state;
+  // --- Update Blynk ---
+  Blynk.virtualWrite(V1, displayedMoisture);
 
-    // Print to Serial
-    Serial.print("Soil Value: ");
-    Serial.print(soilValue);
-    Serial.print(" | ");
-    Serial.println(statusMsg);
+  String soilState;
+  if (displayedMoisture < 25) soilState = "Super Dry";
+  else if (displayedMoisture < 40) soilState = "Dry";
+  else if (displayedMoisture <= 70) soilState = "Moist";
+  else if (displayedMoisture <= 85) soilState = "Wet";
+  else soilState = "Soaked";
 
-    // Send to Blynk
-    Blynk.virtualWrite(V1, moisturePercent);   // V1 = Gauge/Display widget
-    Blynk.virtualWrite(V2, statusMsg);         // V2 = Text Label widget
+  Blynk.virtualWrite(V2, soilState);
 
-    delay(2000); // Update every 2 seconds
+  // --- Auto Pump Control ---
+  if (displayedMoisture < 30) {
+    digitalWrite(RELAY_PUMP, HIGH);
+    Blynk.virtualWrite(V3, 1);
+    Serial.println("🚿 Auto Pump ON (Soil too dry)");
+  } else if (displayedMoisture > 70) {
+    digitalWrite(RELAY_PUMP, LOW);
+    Blynk.virtualWrite(V3, 0);
+    Serial.println("🚿 Auto Pump OFF (Soil moist enough)");
   }
+
+  Serial.print("🌿 Soil Moisture (smoothed): ");
+  Serial.print(displayedMoisture);
+  Serial.print("% | ");
+  Serial.println(soilState);
+
+  delay(200);  // Faster loop for smooth decrease
 }
